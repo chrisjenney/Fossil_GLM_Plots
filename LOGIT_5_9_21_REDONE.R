@@ -34,13 +34,15 @@ summary(RTC_GLM)
 confint(RTC_GLM)
 
 
-RTC_GLM <- glm(RoundtailChub ~ Depth + Velo + Substrate + PercentCover + InstreamCover + Above
+RTC_GLM <- glm(RoundtailChub ~ Depth + Velo + Substrate + PercentCover + InstreamCover + Above + MacroHab
                , family = "binomial", data = Roundtail.data)
 
 # Create a GLM Prediction Figure
-Cov1_pred_data_1 <- expand.grid(Depth= seq(min(Roundtail.data$Depth),max(Roundtail.data$Depth),length.out=100),
-                              
-                              Above=c(0,1))
+
+
+Cov1_pred_data_1 <- expand.grid(Above=c(0,1),MacroHab=c("pool","riffle", "run"),
+                                Depth= seq(min(Roundtail.data$Depth),max(Roundtail.data$Depth),
+                                           length.out=30))
 
 Cov1_pred_data_1$Above<-factor(Cov1_pred_data_1$Above)
 
@@ -57,6 +59,7 @@ Preds_Cov1_1 <- predict(RTC_GLM, newdata=Cov1_pred_data_1,
                       
                       type='link',se.fit=T) # To get the SE’s on the link scale
 
+
 Cov1_pred_data_1$Pred <-plogis(Preds_Cov1_1$fit)
 
 Cov1_pred_data_1$LCI <- plogis(Preds_Cov1_1$fit-1.96*Preds_Cov1_1$se) # Not sure if “se” is where the SE’s are in Preds_Cov1
@@ -66,13 +69,20 @@ Cov1_pred_data_1$UCI <- plogis(Preds_Cov1_1$fit+1.96*Preds_Cov1_1$se)
 Cov1_pred_data_1$Covariate <- "Depth"
 
 
-plt <- ggplot(Cov1_pred_data_1, aes(Cov1_pred_data_1$Depth, Cov1_pred_data_1$Pred, col = Cov1_pred_data_1$Above)) + 
-  geom_point(size = 2) + 
-  geom_smooth(method = "glm", se = T, 
+
+plt <- ggplot(data = Cov1_pred_data_1, aes(x = Cov1_pred_data_1$Depth, y = Cov1_pred_data_1$Pred, 
+                                           color = Cov1_pred_data_1$Above,
+                                           shape = MacroHab)) + 
+  geom_point(size = 2.5) + 
+  scale_fill_manual(values=c("blue", "cyan4")) + 
+  geom_smooth(method = "glm", se = F,
               method.args = list(family = "binomial"))
+
+
+
 plot_depth <- plt + xlab("Depth(m)") + ylab("Predicted Probs. From GLM") + scale_color_discrete(name = "Bass", labels = c("present", "not present"))
 
-plot_depth       
+plot_depth <- plot_depth + theme_bw() + ggtitle("Roundtail Chub") + ylim(0, 1.0)   
 
 
 ## RTC Flow Velocity
@@ -80,13 +90,14 @@ plot_depth
 #
 #
 
-RTC_GLM <- glm(RoundtailChub ~ Depth + Velo + Substrate + PercentCover + InstreamCover + Above
+RTC_GLM <- glm(RoundtailChub ~ Depth + Velo + Substrate + PercentCover + InstreamCover + Above + MacroHab
                , family = "binomial", data = Roundtail.data)
 
 # Create a GLM Prediction Figure
-Cov1_pred_data_2 <- expand.grid(Velo= seq(min(Roundtail.data$Velo),max(Roundtail.data$Velo),length.out=100),
-                              
-                              Above=c(0,1))
+
+Cov1_pred_data_2 <- expand.grid(Above=c(0,1),MacroHab=c("pool","riffle", "run"),
+                                Velo= seq(min(Roundtail.data$Velo),max(Roundtail.data$Velo),
+                                           length.out=30))
 
 Cov1_pred_data_2$Above<-factor(Cov1_pred_data_2$Above)
 
@@ -112,23 +123,33 @@ Cov1_pred_data_2$UCI <- plogis(Preds_Cov1_2$fit+1.96*Preds_Cov1_2$se)
 Cov1_pred_data_2$Covariate <- "Velo"
 
 
-plt_velo <- ggplot(Cov1_pred_data_2, aes(Cov1_pred_data_2$Velo, Cov1_pred_data_2$Pred, col = Cov1_pred_data_2$Above)) + 
-  geom_point(size = 2) + 
-  geom_smooth(method = "glm", se = T, 
+plt_vel <- ggplot(data = Cov1_pred_data_2, aes(x = Cov1_pred_data_2$Velo, y = Cov1_pred_data_2$Pred, 
+                                           color = Cov1_pred_data_2$Above,
+                                           shape = MacroHab)) + 
+  geom_point(size = 2.5) + 
+  scale_fill_manual(values=c("blue", "cyan4")) + 
+  geom_smooth(method = "glm", se = F,
               method.args = list(family = "binomial"))
-plot_velo <- plt_velo + scale_color_discrete(name = "Bass", labels = c("present", "not present")) +
-  xlab("Velocity (m^3/s)") + ylab("Predicted Probs. From GLM")
-plot_velo
+
+
+
+plt_velocity <- plt_vel + xlab("Flow Velocity (m^3/s") + ylab("Predicted Probs. From GLM") + scale_color_discrete(name = "Bass", labels = c("present", "not present"))
+
+plt_velocity <-plt_velocity + theme_bw()+ ggtitle("Roundtail Chub") + ylim(0, 1.0)    
+
+
 #
 #
 ###Substrate
-RTC_GLM <- glm(RoundtailChub ~ Depth + Velo + Substrate + PercentCover + InstreamCover + Above
+RTC_GLM <- glm(RoundtailChub ~ Depth + Velo + Substrate + PercentCover + InstreamCover + 
+                 Above + MacroHab
                , family = "binomial", data = Roundtail.data)
 
 # Create a GLM Prediction Figure
-Cov1_pred_data_3 <- expand.grid(Substrate= seq(min(Roundtail.data$Substrate),max(Roundtail.data$Substrate),length.out=100),
-                              
-                              Above=c(0,1))
+Cov1_pred_data_3 <- expand.grid(Above=c(0,1),MacroHab=c("pool","riffle", "run"),
+                                Substrate= seq(min(Roundtail.data$Substrate),max(Roundtail.data$Substrate),
+                                          length.out=30))
+
 
 Cov1_pred_data_3$Above<-factor(Cov1_pred_data_3$Above)
 
@@ -154,24 +175,36 @@ Cov1_pred_data_3$UCI <- plogis(Preds_Cov1_3$fit+1.96*Preds_Cov1_3$se)
 Cov1_pred_data_3$Covariate <- "Substrate"
 
 
-plt_sub <- ggplot(Cov1_pred_data_3, aes(Cov1_pred_data_3$Substrate, Cov1_pred_data_3$Pred, col = Cov1_pred_data_3$Above)) + 
-  geom_point(size = 2) + 
-  geom_smooth(method = "glm", se = T, 
+plt_sub <- ggplot(data = Cov1_pred_data_3, aes(x = Cov1_pred_data_3$Substrate, y = Cov1_pred_data_3$Pred, 
+                                               color = Cov1_pred_data_3$Above,
+                                               shape = MacroHab)) + 
+  geom_point(size = 2.5) + 
+  scale_fill_manual(values=c("blue", "cyan4")) + 
+  geom_smooth(method = "glm", se = F,
               method.args = list(family = "binomial"))
-plot_sub <- plt_sub  + scale_color_discrete(name = "Bass", labels = c("present", "not present"))+
-  xlab("Substrate Composition") + ylab("Predicted Probs. From GLM")
-plot_sub
+
+
+
+plt_substrate <- plt_sub + xlab("Substrate Composition") + ylab("Predicted Probs. From GLM") + scale_color_discrete(name = "Bass", labels = c("present", "not present"))
+
+plt_substrate <- plt_substrate + theme_bw()  + ggtitle("Roundtail Chub") + ylim(0, 1.0)
+
+
+
+
+
 ###
 ## Percent Overhead Cover
 RTC_GLM <- glm(RoundtailChub ~ Depth + Velo + Substrate + PercentCover + InstreamCover + Above
                , family = "binomial", data = Roundtail.data)
 
 # Create a GLM Prediction Figure
-Cov1_pred_data_4 <- expand.grid(PercentCover= seq(min(Roundtail.data$PercentCover),max(Roundtail.data$PercentCover),length.out=100),
-                              
-                              Above=c(0,1))
+Cov1_pred_data_4 <- expand.grid(Above=c(0,1),MacroHab=c("pool","riffle", "run"),
+                                PercentCover= seq(min(Roundtail.data$PercentCover),max(Roundtail.data$PercentCover),
+                                               length.out=30))
 
 Cov1_pred_data_4$Above<-factor(Cov1_pred_data_4$Above)
+
 
 Cov1_pred_data_4$Depth <- mean(Roundtail.data$Depth)
 
@@ -195,22 +228,36 @@ Cov1_pred_data_4$UCI <- plogis(Preds_Cov1_4$fit+1.96*Preds_Cov1_4$se)
 Cov1_pred_data_4$Covariate <- "Percent Cover"
 
 
-plt_cover <- ggplot(Cov1_pred_data_4, aes(Cov1_pred_data_4$PercentCover, Cov1_pred_data_4$Pred, col = Cov1_pred_data_4$Above)) + 
-  geom_point(size = 2) + 
-  geom_smooth(method = "glm", se = T, 
+
+
+plt_cv <- ggplot(data = Cov1_pred_data_4, aes(x = Cov1_pred_data_4$PercentCover, y = Cov1_pred_data_4$Pred, 
+                                               color = Cov1_pred_data_4$Above,
+                                               shape = MacroHab)) + 
+  geom_point(size = 2.5) + 
+  scale_fill_manual(values=c("blue", "cyan4")) + 
+  geom_smooth(method = "glm", se = F,
               method.args = list(family = "binomial"))
-plot_cover <- plt_cover + scale_color_discrete(name = "Bass", labels = c("present", "not present"))+
-  xlab("Percent Overhead Cover") + ylab("Predicted Probs. From GLM")
-plot_cover
+
+
+
+plt_cover <- plt_cv + xlab("Percent Canopy Cover") + ylab("Predicted Probs. From GLM") + scale_color_discrete(name = "Bass", labels = c("present", "not present"))
+
+plt_cover <- plt_cover + theme_bw()  + ggtitle("Roundtail Chub") + ylim(0, 1.0)
+
+
+
+
+
 ###
 #Plot Instream Cover
 RTC_GLM <- glm(RoundtailChub ~ Depth + Velo + Substrate + PercentCover + InstreamCover + Above
                , family = "binomial", data = Roundtail.data)
 
 # Create a GLM Prediction Figure
-Cov1_pred_data_5 <- expand.grid(InstreamCover= seq(min(Roundtail.data$InstreamCover),max(Roundtail.data$InstreamCover),length.out=100),
-                              
-                              Above=c(0,1))
+
+Cov1_pred_data_5 <- expand.grid(Above=c(0,1),MacroHab=c("pool","riffle", "run"),
+                                InstreamCover= seq(min(Roundtail.data$InstreamCover),max(Roundtail.data$InstreamCover),
+                                                  length.out=30))
 
 Cov1_pred_data_5$Above<-factor(Cov1_pred_data_5$Above)
 
@@ -236,18 +283,26 @@ Cov1_pred_data_5$UCI <- plogis(Preds_Cov1_5$fit+1.96*Preds_Cov1_5$se)
 Cov1_pred_data_5$Covariate <- "Instream Cover"
 
 
-plt_instreamcover <- ggplot(Cov1_pred_data_5, aes(Cov1_pred_data_5$InstreamCover, Cov1_pred_data_5$Pred, col = Cov1_pred_data_5$Above)) + 
-  geom_point(size = 2) + 
-  geom_smooth(method = "glm", se = T, 
+plt_is <- ggplot(data = Cov1_pred_data_5, aes(x = Cov1_pred_data_5$InstreamCover, y = Cov1_pred_data_5$Pred, 
+                                              color = Cov1_pred_data_5$Above,
+                                              shape = MacroHab)) + 
+  geom_point(size = 2.5) + 
+  scale_fill_manual(values=c("blue", "cyan4")) + 
+  geom_smooth(method = "glm", se = F,
               method.args = list(family = "binomial"))
-Plot_Instream <- plt_instreamcover + scale_color_discrete(name = "Bass", labels = c("present", "not present"))+
-  xlab("Percent Instream") + ylab("Predicted Probs. From GLM")
-Plot_Instream
+
+
+
+plt_instream <- plt_is + xlab("Instream Cover") + ylab("Predicted Probs. From GLM") + scale_color_discrete(name = "Bass", labels = c("present", "not present"))
+
+plt_instream <- plt_instream + theme_bw()+ ggtitle("Roundtail Chub") + ylim(0, 1.0)
+
+
 
 library(ggpubr)
-Roundtail_Plots <- ggarrange(plot_depth, plot_velo, plot_sub, plot_cover,Plot_Instream,
+Roundtail_Plots <- ggarrange(plot_depth, plt_velocity, plt_substrate, plt_cover,plt_instream,
                         nrow = 3, ncol = 2)
-Roundtail_Plots
+Roundtail_Plots + ggtitle("Roundtail Chub")
 
 #sink the file into whereever the fuck i put it. 
 sink(file = "LOGIT_5_9/RTC_GLM_FULL.txt")
@@ -256,6 +311,9 @@ confint(RTC_GLM)
 sink()
 
 
+## DESERT SUCKER ANALYSIS
+###YOU MADE IT!
+## I THINK IT LOOKS..... OKAY
 
 
 #Desert Sucker
@@ -277,6 +335,284 @@ Desert_GLM <- glm(Desert.Sucker ~ Depth + Velo + Substrate + PercentCover + Inst
                  Above*MacroHab, family = "binomial", data = Desert.data)
 summary(Desert_GLM)
 confint(Desert_GLM)
+###
+#####
+#####
+#Plots for DS
+
+DS_GLM <- glm(Desert.Sucker ~ Depth + Velo + Substrate + PercentCover + InstreamCover + Above + MacroHab
+               , family = "binomial", data = Desert.data)
+
+# Create a GLM Prediction Figure
+
+## Desert Sucker Depth
+
+Cov1_pred_data_1 <- expand.grid(Above=c(0,1),MacroHab=c("pool","riffle", "run"),
+                                Depth= seq(min(Desert.data$Depth),max(Desert.data$Depth),
+                                           length.out=30))
+
+Cov1_pred_data_1$Above<-factor(Cov1_pred_data_1$Above)
+
+Cov1_pred_data_1$Velo <- mean(Desert.data$Velo)
+
+Cov1_pred_data_1$Substrate <- mean(Desert.data$Substrate)
+
+Cov1_pred_data_1$PercentCover <- mean(Desert.data$PercentCover)
+
+Cov1_pred_data_1$InstreamCover <- mean(Desert.data$InstreamCover)
+
+
+Preds_Cov1_1 <- predict(DS_GLM, newdata=Cov1_pred_data_1,
+                        
+                        type='link',se.fit=T) # To get the SE’s on the link scale
+
+
+Cov1_pred_data_1$Pred <-plogis(Preds_Cov1_1$fit)
+
+Cov1_pred_data_1$LCI <- plogis(Preds_Cov1_1$fit-1.96*Preds_Cov1_1$se) # Not sure if “se” is where the SE’s are in Preds_Cov1
+
+Cov1_pred_data_1$UCI <- plogis(Preds_Cov1_1$fit+1.96*Preds_Cov1_1$se)
+
+Cov1_pred_data_1$Covariate <- "Depth"
+
+
+
+plt <- ggplot(data = Cov1_pred_data_1, aes(x = Cov1_pred_data_1$Depth, y = Cov1_pred_data_1$Pred, 
+                                           color = Cov1_pred_data_1$Above,
+                                           shape = MacroHab)) + 
+  geom_point(size = 2.5) + 
+  scale_fill_manual(values=c("blue", "cyan4")) + 
+  geom_smooth(method = "glm", se = F,
+              method.args = list(family = "binomial"))
+
+
+
+plot_depth <- plt + xlab("Depth(m)") + ylab("Predicted Probs. From GLM") + scale_color_discrete(name = "Bass", labels = c("present", "not present"))
+
+plot_depth <- plot_depth + theme_bw() + ggtitle("Desert Sucker") + ylim(0, 1.0)
+
+
+
+### Desert Sucker Velocity
+
+
+
+DS_GLM <- glm(Desert.Sucker ~ Depth + Velo + Substrate + PercentCover + InstreamCover + Above + MacroHab
+               , family = "binomial", data = Desert.data)
+
+# Create a GLM Prediction Figure
+
+Cov1_pred_data_2 <- expand.grid(Above=c(0,1),MacroHab=c("pool","riffle", "run"),
+                                Velo= seq(min(Desert.data$Velo),max(Desert.data$Velo),
+                                          length.out=30))
+
+Cov1_pred_data_2$Above<-factor(Cov1_pred_data_2$Above)
+
+Cov1_pred_data_2$Depth <- mean(Desert.data$Depth)
+
+Cov1_pred_data_2$Substrate <- mean(Desert.data$Substrate)
+
+Cov1_pred_data_2$PercentCover <- mean(Desert.data$PercentCover)
+
+Cov1_pred_data_2$InstreamCover <- mean(Desert.data$InstreamCover)
+
+
+Preds_Cov1_2 <- predict(DS_GLM, newdata=Cov1_pred_data_2,
+                        
+                        type='link',se.fit=T) # To get the SE’s on the link scale
+
+Cov1_pred_data_2$Pred <-plogis(Preds_Cov1_2$fit)
+
+Cov1_pred_data_2$LCI <- plogis(Preds_Cov1_2$fit-1.96*Preds_Cov1_2$se) # Not sure if “se” is where the SE’s are in Preds_Cov1
+
+Cov1_pred_data_2$UCI <- plogis(Preds_Cov1_2$fit+1.96*Preds_Cov1_2$se)
+
+Cov1_pred_data_2$Covariate <- "Velo"
+
+
+plt_vel <- ggplot(data = Cov1_pred_data_2, aes(x = Cov1_pred_data_2$Velo, y = Cov1_pred_data_2$Pred, 
+                                               color = Cov1_pred_data_2$Above,
+                                               shape = MacroHab)) + 
+  geom_point(size = 2.5) + 
+  scale_fill_manual(values=c("blue", "cyan4")) + 
+  geom_smooth(method = "glm", se = F,
+              method.args = list(family = "binomial"))
+
+
+
+plt_velocity <- plt_vel + xlab("Flow Velocity (m^3/s") + ylab("Predicted Probs. From GLM") + scale_color_discrete(name = "Bass", labels = c("present", "not present"))
+
+plt_velocity <- plt_velocity + theme_bw() + ggtitle("Desert Sucker") + ylim(0, 1.0)
+
+
+# Desert Sucker
+# SUbstrate
+###Substrate
+DS_GLM <- glm(Desert.Sucker ~ Depth + Velo + Substrate + PercentCover + InstreamCover + 
+                 Above + MacroHab
+               , family = "binomial", data = Desert.data)
+
+# Create a GLM Prediction Figure
+Cov1_pred_data_3 <- expand.grid(Above=c(0,1),MacroHab=c("pool","riffle", "run"),
+                                Substrate= seq(min(Desert.data$Substrate),max(Desert.data$Substrate),
+                                               length.out=30))
+
+
+Cov1_pred_data_3$Above<-factor(Cov1_pred_data_3$Above)
+
+Cov1_pred_data_3$Depth <- mean(Desert.data$Depth)
+
+Cov1_pred_data_3$Velo <- mean(Desert.data$Velo)
+
+Cov1_pred_data_3$PercentCover <- mean(Desert.data$PercentCover)
+
+Cov1_pred_data_3$InstreamCover <- mean(Desert.data$InstreamCover)
+
+
+Preds_Cov1_3 <- predict(DS_GLM, newdata=Cov1_pred_data_3,
+                        
+                        type='link',se.fit=T) # To get the SE’s on the link scale
+
+Cov1_pred_data_3$Pred <-plogis(Preds_Cov1_3$fit)
+
+Cov1_pred_data_3$LCI <- plogis(Preds_Cov1_3$fit-1.96*Preds_Cov1_3$se) # Not sure if “se” is where the SE’s are in Preds_Cov1
+
+Cov1_pred_data_3$UCI <- plogis(Preds_Cov1_3$fit+1.96*Preds_Cov1_3$se)
+
+Cov1_pred_data_3$Covariate <- "Substrate"
+
+
+plt_sub <- ggplot(data = Cov1_pred_data_3, aes(x = Cov1_pred_data_3$Substrate, y = Cov1_pred_data_3$Pred, 
+                                               color = Cov1_pred_data_3$Above,
+                                               shape = MacroHab)) + 
+  geom_point(size = 2.5) + 
+  scale_fill_manual(values=c("blue", "cyan4")) + 
+  geom_smooth(method = "glm", se = F,
+              method.args = list(family = "binomial"))
+
+
+
+plt_substrate <- plt_sub + xlab("Substrate Composition") + ylab("Predicted Probs. From GLM") + scale_color_discrete(name = "Bass", labels = c("present", "not present"))
+
+plt_substrate <-plt_substrate + theme_bw() + ggtitle ("Desert Sucker") + ylim(0, 1.0)
+
+
+##
+#
+##
+##
+###
+## Percent Overhead Cover
+DS_GLM <- glm(Desert.Sucker ~ Depth + Velo + Substrate + PercentCover + InstreamCover + Above
+               , family = "binomial", data = Desert.data)
+
+# Create a GLM Prediction Figure
+Cov1_pred_data_4 <- expand.grid(Above=c(0,1),MacroHab=c("pool","riffle", "run"),
+                                PercentCover= seq(min(Desert.data$PercentCover),max(Desert.data$PercentCover),
+                                                  length.out=30))
+
+Cov1_pred_data_4$Above<-factor(Cov1_pred_data_4$Above)
+
+
+Cov1_pred_data_4$Depth <- mean(Desert.data$Depth)
+
+Cov1_pred_data_4$Velo <- mean(Desert.data$Velo)
+
+Cov1_pred_data_4$Substrate <- mean(Desert.data$Substrate)
+
+Cov1_pred_data_4$InstreamCover <- mean(Desert.data$InstreamCover)
+
+
+Preds_Cov1_4 <- predict(DS_GLM, newdata=Cov1_pred_data_4,
+                        
+                        type='link',se.fit=T) # To get the SE’s on the link scale
+
+Cov1_pred_data_4$Pred <-plogis(Preds_Cov1_4$fit)
+
+Cov1_pred_data_4$LCI <- plogis(Preds_Cov1_4$fit-1.96*Preds_Cov1_4$se) # Not sure if “se” is where the SE’s are in Preds_Cov1
+
+Cov1_pred_data_4$UCI <- plogis(Preds_Cov1_4$fit+1.96*Preds_Cov1_4$se)
+
+Cov1_pred_data_4$Covariate <- "Percent Cover"
+
+
+
+
+plt_cv <- ggplot(data = Cov1_pred_data_4, aes(x = Cov1_pred_data_4$PercentCover, y = Cov1_pred_data_4$Pred, 
+                                              color = Cov1_pred_data_4$Above,
+                                              shape = MacroHab)) + 
+  geom_point(size = 2.5) + 
+  scale_fill_manual(values=c("blue", "cyan4")) + 
+  geom_smooth(method = "glm", se = F,
+              method.args = list(family = "binomial"))
+
+
+
+plt_cover <- plt_cv + xlab("Percent Canopy Cover") + ylab("Predicted Probs. From GLM") + scale_color_discrete(name = "Bass", labels = c("present", "not present"))
+
+plt_cover <-plt_cover + theme_bw() + ggtitle ("Desert Sucker") + ylim(0, 1.0)
+
+
+
+
+
+###
+#Plot Instream Cover
+DS_GLM <- glm(Desert.Sucker ~ Depth + Velo + Substrate + PercentCover + InstreamCover + Above
+               , family = "binomial", data = Desert.data)
+
+# Create a GLM Prediction Figure
+
+Cov1_pred_data_5 <- expand.grid(Above=c(0,1),MacroHab=c("pool","riffle", "run"),
+                                InstreamCover= seq(min(Desert.data$InstreamCover),max(Desert.data$InstreamCover),
+                                                   length.out=30))
+
+Cov1_pred_data_5$Above<-factor(Cov1_pred_data_5$Above)
+
+Cov1_pred_data_5$Depth <- mean(Desert.data$Depth)
+
+Cov1_pred_data_5$Velo <- mean(Desert.data$Velo)
+
+Cov1_pred_data_5$Substrate <- mean(Desert.data$Substrate)
+
+Cov1_pred_data_5$PercentCover <- mean(Desert.data$PercentCover)
+
+
+Preds_Cov1_5 <- predict(DS_GLM, newdata=Cov1_pred_data_5,
+                        
+                        type='link',se.fit=T) # To get the SE’s on the link scale
+
+Cov1_pred_data_5$Pred <-plogis(Preds_Cov1_5$fit)
+
+Cov1_pred_data_5$LCI <- plogis(Preds_Cov1_5$fit-1.96*Preds_Cov1_5$se) # Not sure if “se” is where the SE’s are in Preds_Cov1
+
+Cov1_pred_data_5$UCI <- plogis(Preds_Cov1_5$fit+1.96*Preds_Cov1_5$se)
+
+Cov1_pred_data_5$Covariate <- "Instream Cover"
+
+
+plt_is <- ggplot(data = Cov1_pred_data_5, aes(x = Cov1_pred_data_5$InstreamCover, y = Cov1_pred_data_5$Pred, 
+                                              color = Above,
+                                              shape = MacroHab)) + 
+  geom_point(size = 2.5) + 
+  scale_fill_manual(values=c("blue", "cyan4")) + 
+  geom_smooth(method = "glm", se = F,
+              method.args = list(family = "binomial"))
+
+
+
+plt_instream <- plt_is + xlab("Instream Cover") + ylab("Predicted Probs. From GLM") + scale_color_discrete(name = "Bass", labels = c("present", "not present"))
+
+plt_instream <-plt_instream + theme_bw() + ggtitle("Desert Sucker") + ylim(0, 1.0)
+
+
+
+library(ggpubr)
+Desert_Plots <- ggarrange(plot_depth, plt_velocity, plt_substrate, plt_cover,plt_instream,
+                             nrow = 3, ncol = 2)
+Desert_Plots
+
+
 
 #sink the file into whereever the fuck i put it. 
 sink(file = "LOGIT_5_9/Desert_GLM_FULL.txt")
@@ -304,12 +640,298 @@ Sonora.data_GLM <- glm(Sonora.Sucker ~ Depth + Velo + Substrate + PercentCover +
 summary(Sonora.data_GLM)
 confint(Sonora.data_GLM)
 
+
+###
+#####
+#####
+#Plots for SS
+# SS Depth
+SS_GLM <- glm(Sonora.Sucker ~ Depth + Velo + Substrate + PercentCover + InstreamCover + Above + MacroHab
+              , family = "binomial", data = Sonora.data)
+
+# Create a GLM Prediction Figure
+
+## Sonora Sucker Depth
+
+Cov1_pred_data_1 <- expand.grid(Above=c(0,1),MacroHab=c("pool","riffle", "run"),
+                                Depth= seq(min(Sonora.data$Depth),max(Sonora.data$Depth),
+                                           length.out=30))
+
+Cov1_pred_data_1$Above<-factor(Cov1_pred_data_1$Above)
+
+Cov1_pred_data_1$Velo <- mean(Sonora.data$Velo)
+
+Cov1_pred_data_1$Substrate <- mean(Sonora.data$Substrate)
+
+Cov1_pred_data_1$PercentCover <- mean(Sonora.data$PercentCover)
+
+Cov1_pred_data_1$InstreamCover <- mean(Sonora.data$InstreamCover)
+
+
+Preds_Cov1_1 <- predict(SS_GLM, newdata=Cov1_pred_data_1,
+                        
+                        type='link',se.fit=T) # To get the SE’s on the link scale
+
+
+Cov1_pred_data_1$Pred <-plogis(Preds_Cov1_1$fit)
+
+Cov1_pred_data_1$LCI <- plogis(Preds_Cov1_1$fit-1.96*Preds_Cov1_1$se) # Not sure if “se” is where the SE’s are in Preds_Cov1
+
+Cov1_pred_data_1$UCI <- plogis(Preds_Cov1_1$fit+1.96*Preds_Cov1_1$se)
+
+Cov1_pred_data_1$Covariate <- "Depth"
+
+
+
+plt <- ggplot(data = Cov1_pred_data_1, aes(x = Cov1_pred_data_1$Depth, y = Cov1_pred_data_1$Pred, 
+                                           color = Cov1_pred_data_1$Above,
+                                           shape = MacroHab)) + 
+  geom_point(size = 2.5) + 
+  scale_fill_manual(values=c("blue", "cyan4")) + 
+  geom_smooth(method = "glm", se = F,
+              method.args = list(family = "binomial"))
+
+
+
+plot_depth <- plt + xlab("Depth(m)") + ylab("Predicted Probs. From GLM") + scale_color_discrete(name = "Bass", labels = c("present", "not present"))
+
+plot_depth <-  plot_depth + theme_bw() + ggtitle("Sonora Sucker") + ylim(0, 1.0)
+
+
+
+### Sonora Sucker Velocity
+
+
+
+SS_GLM <- glm(Sonora.Sucker ~ Depth + Velo + Substrate + PercentCover + InstreamCover + Above + MacroHab
+              , family = "binomial", data = Sonora.data)
+
+# Create a GLM Prediction Figure
+
+Cov1_pred_data_2 <- expand.grid(Above=c(0,1),MacroHab=c("pool","riffle", "run"),
+                                Velo= seq(min(Sonora.data$Velo),max(Sonora.data$Velo),
+                                          length.out=30))
+
+Cov1_pred_data_2$Above<-factor(Cov1_pred_data_2$Above)
+
+Cov1_pred_data_2$Depth <- mean(Sonora.data$Depth)
+
+Cov1_pred_data_2$Substrate <- mean(Sonora.data$Substrate)
+
+Cov1_pred_data_2$PercentCover <- mean(Sonora.data$PercentCover)
+
+Cov1_pred_data_2$InstreamCover <- mean(Sonora.data$InstreamCover)
+
+
+Preds_Cov1_2 <- predict(SS_GLM, newdata=Cov1_pred_data_2,
+                        
+                        type='link',se.fit=T) # To get the SE’s on the link scale
+
+Cov1_pred_data_2$Pred <-plogis(Preds_Cov1_2$fit)
+
+Cov1_pred_data_2$LCI <- plogis(Preds_Cov1_2$fit-1.96*Preds_Cov1_2$se) # Not sure if “se” is where the SE’s are in Preds_Cov1
+
+Cov1_pred_data_2$UCI <- plogis(Preds_Cov1_2$fit+1.96*Preds_Cov1_2$se)
+
+Cov1_pred_data_2$Covariate <- "Velo"
+
+
+plt_vel <- ggplot(data = Cov1_pred_data_2, aes(x = Cov1_pred_data_2$Velo, y = Cov1_pred_data_2$Pred, 
+                                               color = Cov1_pred_data_2$Above,
+                                               shape = MacroHab)) + 
+  geom_point(size = 2.5) + 
+  scale_fill_manual(values=c("blue", "cyan4")) + 
+  geom_smooth(method = "glm", se = F,
+              method.args = list(family = "binomial"))
+
+
+
+plt_velocity <- plt_vel + xlab("Flow Velocity (m^3/s") + ylab("Predicted Probs. From GLM") + scale_color_discrete(name = "Bass", labels = c("present", "not present"))
+
+plt_velocity <- plt_velocity + theme_bw() + ggtitle("Sonora Sucker") + ylim(0, 1.0)
+
+
+# Desert Sucker
+# SUbstrate
+###Substrate
+SS_GLM <- glm(Sonora.Sucker ~ Depth + Velo + Substrate + PercentCover + InstreamCover + 
+                Above + MacroHab
+              , family = "binomial", data = Sonora.data)
+
+# Create a GLM Prediction Figure
+Cov1_pred_data_3 <- expand.grid(Above=c(0,1),MacroHab=c("pool","riffle", "run"),
+                                Substrate= seq(min(Sonora.data$Substrate),max(Sonora.data$Substrate),
+                                               length.out=30))
+
+
+Cov1_pred_data_3$Above<-factor(Cov1_pred_data_3$Above)
+
+Cov1_pred_data_3$Depth <- mean(Sonora.data$Depth)
+
+Cov1_pred_data_3$Velo <- mean(Sonora.data$Velo)
+
+Cov1_pred_data_3$PercentCover <- mean(Sonora.data$PercentCover)
+
+Cov1_pred_data_3$InstreamCover <- mean(Sonora.data$InstreamCover)
+
+
+Preds_Cov1_3 <- predict(SS_GLM, newdata=Cov1_pred_data_3,
+                        
+                        type='link',se.fit=T) # To get the SE’s on the link scale
+
+Cov1_pred_data_3$Pred <-plogis(Preds_Cov1_3$fit)
+
+Cov1_pred_data_3$LCI <- plogis(Preds_Cov1_3$fit-1.96*Preds_Cov1_3$se) # Not sure if “se” is where the SE’s are in Preds_Cov1
+
+Cov1_pred_data_3$UCI <- plogis(Preds_Cov1_3$fit+1.96*Preds_Cov1_3$se)
+
+Cov1_pred_data_3$Covariate <- "Substrate"
+
+
+plt_sub <- ggplot(data = Cov1_pred_data_3, aes(x = Cov1_pred_data_3$Substrate, y = Cov1_pred_data_3$Pred, 
+                                               color = Cov1_pred_data_3$Above,
+                                               shape = MacroHab)) + 
+  geom_point(size = 2.5) + 
+  scale_fill_manual(values=c("blue", "cyan4")) + 
+  geom_smooth(method = "glm", se = F,
+              method.args = list(family = "binomial"))
+
+
+
+plt_substrate <- plt_sub + xlab("Substrate Composition") + ylab("Predicted Probs. From GLM") + scale_color_discrete(name = "Bass", labels = c("present", "not present"))
+
+
+plt_substrate <-plt_substrate + theme_bw() + ggtitle ("Sonora Sucker") + ylim(0, 1.0)
+
+
+##
+#
+##
+##
+###
+## Percent Overhead Cover
+SS_GLM <- glm(Sonora.Sucker ~ Depth + Velo + Substrate + PercentCover + InstreamCover + Above
+              , family = "binomial", data = Sonora.data)
+
+# Create a GLM Prediction Figure
+Cov1_pred_data_4 <- expand.grid(Above=c(0,1),MacroHab=c("pool","riffle", "run"),
+                                PercentCover= seq(min(Sonora.data$PercentCover),max(Sonora.data$PercentCover),
+                                                  length.out=30))
+
+Cov1_pred_data_4$Above<-factor(Cov1_pred_data_4$Above)
+
+
+Cov1_pred_data_4$Depth <- mean(Sonora.data$Depth)
+
+Cov1_pred_data_4$Velo <- mean(Sonora.data$Velo)
+
+Cov1_pred_data_4$Substrate <- mean(Sonora.data$Substrate)
+
+Cov1_pred_data_4$InstreamCover <- mean(Sonora.data$InstreamCover)
+
+
+Preds_Cov1_4 <- predict(SS_GLM, newdata=Cov1_pred_data_4,
+                        
+                        type='link',se.fit=T) # To get the SE’s on the link scale
+
+Cov1_pred_data_4$Pred <-plogis(Preds_Cov1_4$fit)
+
+Cov1_pred_data_4$LCI <- plogis(Preds_Cov1_4$fit-1.96*Preds_Cov1_4$se) # Not sure if “se” is where the SE’s are in Preds_Cov1
+
+Cov1_pred_data_4$UCI <- plogis(Preds_Cov1_4$fit+1.96*Preds_Cov1_4$se)
+
+Cov1_pred_data_4$Covariate <- "Percent Cover"
+
+
+
+
+plt_cv <- ggplot(data = Cov1_pred_data_4, aes(x = Cov1_pred_data_4$PercentCover, y = Cov1_pred_data_4$Pred, 
+                                              color = Cov1_pred_data_4$Above,
+                                              shape = MacroHab)) + 
+  geom_point(size = 2.5) + 
+  scale_fill_manual(values=c("blue", "cyan4")) + 
+  geom_smooth(method = "glm", se = F,
+              method.args = list(family = "binomial"))
+
+
+
+plt_cover <- plt_cv + xlab("Percent Canopy Cover") + ylab("Predicted Probs. From GLM") + scale_color_discrete(name = "Bass", labels = c("present", "not present"))
+
+plt_cover <- plt_cover + theme_bw() + ggtitle ("Sonora Sucker") + ylim(0, 1.0)
+
+
+
+
+
+###
+#Plot Instream Cover
+SS_GLM <- glm(Sonora.Sucker ~ Depth + Velo + Substrate + PercentCover + InstreamCover + Above
+              , family = "binomial", data = Sonora.data)
+
+# Create a GLM Prediction Figure
+
+Cov1_pred_data_5 <- expand.grid(Above=c(0,1),MacroHab=c("pool","riffle", "run"),
+                                InstreamCover= seq(min(Sonora.data$InstreamCover),max(Sonora.data$InstreamCover),
+                                                   length.out=30))
+
+Cov1_pred_data_5$Above<-factor(Cov1_pred_data_5$Above)
+
+Cov1_pred_data_5$Depth <- mean(Sonora.data$Depth)
+
+Cov1_pred_data_5$Velo <- mean(Sonora.data$Velo)
+
+Cov1_pred_data_5$Substrate <- mean(Sonora.data$Substrate)
+
+Cov1_pred_data_5$PercentCover <- mean(Sonora.data$PercentCover)
+
+
+Preds_Cov1_5 <- predict(SS_GLM, newdata=Cov1_pred_data_5,
+                        
+                        type='link',se.fit=T) # To get the SE’s on the link scale
+
+Cov1_pred_data_5$Pred <-plogis(Preds_Cov1_5$fit)
+
+Cov1_pred_data_5$LCI <- plogis(Preds_Cov1_5$fit-1.96*Preds_Cov1_5$se) # Not sure if “se” is where the SE’s are in Preds_Cov1
+
+Cov1_pred_data_5$UCI <- plogis(Preds_Cov1_5$fit+1.96*Preds_Cov1_5$se)
+
+Cov1_pred_data_5$Covariate <- "Instream Cover"
+
+
+plt_is <- ggplot(data = Cov1_pred_data_5, aes(x = Cov1_pred_data_5$InstreamCover, y = Cov1_pred_data_5$Pred, 
+                                              color = Cov1_pred_data_5$Above,
+                                              shape = MacroHab)) + 
+  geom_point(size = 2.5) + 
+  scale_fill_manual(values=c("blue", "cyan4")) + 
+  geom_smooth(method = "glm", se = F,
+              method.args = list(family = "binomial"))
+
+
+
+plt_instream <- plt_is + xlab("Instream Cover") + ylab("Predicted Probs. From GLM") + scale_color_discrete(name = "Bass", labels = c("present", "not present"))
+
+plt_instream <-plt_instream + theme_bw() + ggtitle("Sonora Sucker") + ylim(0, 1.0)
+
+
+
+library(ggpubr)
+Sonora_Plots <- ggarrange(plot_depth, plt_velocity, plt_substrate, plt_cover,plt_instream,
+                          nrow = 3, ncol = 2)
+Sonora_Plots
+
+
+
 #sink the file into whereever the fuck i put it. 
 sink(file = "LOGIT_5_9/Sonora.data_GLM_FULL.txt")
 summary(Sonora.data_GLM)
 confint(Sonora.data_GLM)
 sink()
 
+
+
+###
+###
+### Bass ----
 #Black Bass
 Bass <- data %>% 
   filter(Bass == 1) %>% 
@@ -326,9 +948,268 @@ available<-na.omit(available)
 Bass.data <- rbind(Bass, available)
 
 #Run the GLM with the full model
-Bass_GLM <- glm(Bass ~ Depth + Velo + Substrate + PercentCover + InstreamCover + MacroHab , family = "binomial", data = Bass.data)
+Bass_GLM <- glm(Bass ~ Depth + Velo + Substrate + PercentCover + InstreamCover + MacroHab ,
+                family = "binomial", data = Bass.data)
 summary(Bass_GLM)
 confint(Bass_GLM)
+
+# Create a GLM Prediction Figure
+
+## Sonora Sucker Depth
+
+Cov1_pred_data_1 <- expand.grid(MacroHab=c("pool","riffle", "run"),
+                                Depth= seq(min(Bass.data$Depth),max(Bass.data$Depth),
+                                           length.out=30))
+
+
+Cov1_pred_data_1$Velo <- mean(Bass.data$Velo)
+
+Cov1_pred_data_1$Substrate <- mean(Bass.data$Substrate)
+
+Cov1_pred_data_1$PercentCover <- mean(Bass.data$PercentCover)
+
+Cov1_pred_data_1$InstreamCover <- mean(Bass.data$InstreamCover)
+
+
+Preds_Cov1_1 <- predict(Bass_GLM, newdata=Cov1_pred_data_1,
+                        
+                        type='link',se.fit=T) # To get the SE’s on the link scale
+
+
+Cov1_pred_data_1$Pred <-plogis(Preds_Cov1_1$fit)
+
+Cov1_pred_data_1$LCI <- plogis(Preds_Cov1_1$fit-1.96*Preds_Cov1_1$se) # Not sure if “se” is where the SE’s are in Preds_Cov1
+
+Cov1_pred_data_1$UCI <- plogis(Preds_Cov1_1$fit+1.96*Preds_Cov1_1$se)
+
+Cov1_pred_data_1$Covariate <- "Depth"
+
+
+
+plt <- ggplot(data = Cov1_pred_data_1, aes(x = Cov1_pred_data_1$Depth, y = Cov1_pred_data_1$Pred,
+                                           shape = MacroHab)) + 
+  geom_point(size = 2.5) + 
+  scale_fill_manual(values=c("blue", "cyan4")) + 
+  geom_smooth(method = "glm", se = F,
+              method.args = list(family = "binomial"))
+
+
+
+plot_depth <- plt + xlab("Depth(m)") + ylab("Predicted Probs. From GLM") + scale_color_discrete(name = "Bass", labels = c("present", "not present"))
+
+plot_depth <-  plot_depth + theme_bw() + ggtitle("Black Bass") + ylim(0, 1.0)
+
+
+
+### Black Bass Velocity
+
+
+
+Bass_GLM <- glm(Bass ~ Depth + Velo + Substrate + PercentCover + InstreamCover + MacroHab ,
+                 family = "binomial", data = Bass.data)
+
+# Create a GLM Prediction Figure
+
+Cov1_pred_data_2 <- expand.grid(MacroHab=c("pool","riffle", "run"),
+                                Velo= seq(min(Bass.data$Velo),max(Bass.data$Velo),
+                                          length.out=30))
+
+
+Cov1_pred_data_2$Depth <- mean(Bass.data$Depth)
+
+Cov1_pred_data_2$Substrate <- mean(Bass.data$Substrate)
+
+Cov1_pred_data_2$PercentCover <- mean(Bass.data$PercentCover)
+
+Cov1_pred_data_2$InstreamCover <- mean(Bass.data$InstreamCover)
+
+
+Preds_Cov1_2 <- predict(Bass_GLM, newdata=Cov1_pred_data_2,
+                        
+                        type='link',se.fit=T) # To get the SE’s on the link scale
+
+Cov1_pred_data_2$Pred <-plogis(Preds_Cov1_2$fit)
+
+Cov1_pred_data_2$LCI <- plogis(Preds_Cov1_2$fit-1.96*Preds_Cov1_2$se) # Not sure if “se” is where the SE’s are in Preds_Cov1
+
+Cov1_pred_data_2$UCI <- plogis(Preds_Cov1_2$fit+1.96*Preds_Cov1_2$se)
+
+Cov1_pred_data_2$Covariate <- "Velo"
+
+
+plt_vel <- ggplot(data = Cov1_pred_data_2, aes(x = Cov1_pred_data_2$Velo, y = Cov1_pred_data_2$Pred,
+                                               shape = MacroHab)) + 
+  geom_point(size = 2.5) + 
+  scale_fill_manual(values=c("blue", "cyan4")) + 
+  geom_smooth(method = "glm", se = F,
+              method.args = list(family = "binomial"))
+
+
+
+plt_velocity <- plt_vel + xlab("Flow Velocity (m^3/s") + ylab("Predicted Probs. From GLM") + scale_color_discrete(name = "Bass", labels = c("present", "not present"))
+
+plt_velocity <- plt_velocity + theme_bw() + ggtitle("Black Bass") + ylim(0, 1.0)
+plt_velocity
+
+# Black Bass
+# SUbstrate
+###Substrate
+Bass_GLM <- glm(Bass ~ Depth + Velo + Substrate + PercentCover + InstreamCover + MacroHab ,
+                family = "binomial", data = Bass.data)
+
+# Create a GLM Prediction Figure
+Cov1_pred_data_3 <- expand.grid(MacroHab=c("pool","riffle", "run"),
+                                Substrate= seq(min(Bass.data$Substrate),max(Bass.data$Substrate),
+                                               length.out=30))
+
+
+
+
+Cov1_pred_data_3$Depth <- mean(Bass.data$Depth)
+
+Cov1_pred_data_3$Velo <- mean(Bass.data$Velo)
+
+Cov1_pred_data_3$PercentCover <- mean(Bass.data$PercentCover)
+
+Cov1_pred_data_3$InstreamCover <- mean(Bass.data$InstreamCover)
+
+
+Preds_Cov1_3 <- predict(Bass_GLM, newdata=Cov1_pred_data_3,
+                        
+                        type='link',se.fit=T) # To get the SE’s on the link scale
+
+Cov1_pred_data_3$Pred <-plogis(Preds_Cov1_3$fit)
+
+Cov1_pred_data_3$LCI <- plogis(Preds_Cov1_3$fit-1.96*Preds_Cov1_3$se) # Not sure if “se” is where the SE’s are in Preds_Cov1
+
+Cov1_pred_data_3$UCI <- plogis(Preds_Cov1_3$fit+1.96*Preds_Cov1_3$se)
+
+Cov1_pred_data_3$Covariate <- "Substrate"
+
+
+plt_sub <- ggplot(data = Cov1_pred_data_3, aes(x = Cov1_pred_data_3$Substrate, y = Cov1_pred_data_3$Pred,
+                                               shape = MacroHab)) + 
+  geom_point(size = 2.5) + 
+  scale_fill_manual(values=c("blue", "cyan4")) + 
+  geom_smooth(method = "glm", se = F,
+              method.args = list(family = "binomial"))
+
+
+plt_substrate <- plt_sub + xlab("Substrate Composition") + ylab("Predicted Probs. From GLM") + scale_color_discrete(name = "Bass", labels = c("present", "not present"))
+
+
+plt_substrate <-plt_substrate + theme_bw() + ggtitle ("Black Bass") + ylim(0, 1.0)
+plt_substrate
+
+##
+#
+##
+##
+###
+## Percent Overhead Cover
+Bass_GLM <- glm(Bass ~ Depth + Velo + Substrate + PercentCover + InstreamCover + MacroHab ,
+                family = "binomial", data = Bass.data)
+
+# Create a GLM Prediction Figure
+Cov1_pred_data_4 <- expand.grid(MacroHab=c("pool","riffle", "run"),
+                                PercentCover= seq(min(Bass.data$PercentCover),max(Bass.data$PercentCover),
+                                                  length.out=30))
+
+
+Cov1_pred_data_4$Depth <- mean(Bass.data$Depth)
+
+Cov1_pred_data_4$Velo <- mean(Bass.data$Velo)
+
+Cov1_pred_data_4$Substrate <- mean(Bass.data$Substrate)
+
+Cov1_pred_data_4$InstreamCover <- mean(Bass.data$InstreamCover)
+
+
+Preds_Cov1_4 <- predict(Bass_GLM, newdata=Cov1_pred_data_4,
+                        
+                        type='link',se.fit=T) # To get the SE’s on the link scale
+
+Cov1_pred_data_4$Pred <-plogis(Preds_Cov1_4$fit)
+
+Cov1_pred_data_4$LCI <- plogis(Preds_Cov1_4$fit-1.96*Preds_Cov1_4$se) # Not sure if “se” is where the SE’s are in Preds_Cov1
+
+Cov1_pred_data_4$UCI <- plogis(Preds_Cov1_4$fit+1.96*Preds_Cov1_4$se)
+
+Cov1_pred_data_4$Covariate <- "Percent Cover"
+
+
+
+
+plt_cv <- ggplot(data = Cov1_pred_data_4, aes(x = Cov1_pred_data_4$PercentCover, y = Cov1_pred_data_4$Pred,
+                                              shape = MacroHab)) + 
+  geom_point(size = 2.5) + 
+  scale_fill_manual(values=c("blue", "cyan4")) + 
+  geom_smooth(method = "glm", se = F,
+              method.args = list(family = "binomial"))
+
+
+
+plt_cover <- plt_cv + xlab("Percent Canopy Cover") + ylab("Predicted Probs. From GLM") + scale_color_discrete(name = "Bass", labels = c("present", "not present"))
+
+plt_cover <- plt_cover + theme_bw() + ggtitle ("Black Bass") + ylim(0, 1.0)
+
+plt_cover
+
+
+
+###
+#Plot Instream Cover
+Bass_GLM <- glm(Bass ~ Depth + Velo + Substrate + PercentCover + InstreamCover + MacroHab ,
+                family = "binomial", data = Bass.data)
+
+# Create a GLM Prediction Figure
+
+Cov1_pred_data_5 <- expand.grid(MacroHab=c("pool","riffle", "run"),
+                                InstreamCover= seq(min(Bass.data$InstreamCover),max(Bass.data$InstreamCover),
+                                                   length.out=30))
+
+Cov1_pred_data_5$Depth <- mean(Bass.data$Depth)
+
+Cov1_pred_data_5$Velo <- mean(Bass.data$Velo)
+
+Cov1_pred_data_5$Substrate <- mean(Bass.data$Substrate)
+
+Cov1_pred_data_5$PercentCover <- mean(Bass.data$PercentCover)
+
+
+Preds_Cov1_5 <- predict(Bass_GLM, newdata=Cov1_pred_data_5,
+                        
+                        type='link',se.fit=T) # To get the SE’s on the link scale
+
+Cov1_pred_data_5$Pred <-plogis(Preds_Cov1_5$fit)
+
+Cov1_pred_data_5$LCI <- plogis(Preds_Cov1_5$fit-1.96*Preds_Cov1_5$se) # Not sure if “se” is where the SE’s are in Preds_Cov1
+
+Cov1_pred_data_5$UCI <- plogis(Preds_Cov1_5$fit+1.96*Preds_Cov1_5$se)
+
+Cov1_pred_data_5$Covariate <- "Instream Cover"
+
+
+plt_is <- ggplot(data = Cov1_pred_data_5, aes(x = Cov1_pred_data_5$InstreamCover, y = Cov1_pred_data_5$Pred,
+                                              shape = MacroHab)) + 
+  geom_point(size = 2.5) + 
+  scale_fill_manual(values=c("blue", "cyan4")) + 
+  geom_smooth(method = "glm", se = F,
+              method.args = list(family = "binomial"))
+
+
+
+plt_instream <- plt_is + xlab("Instream Cover") + ylab("Predicted Probs. From GLM") + scale_color_discrete(name = "Bass", labels = c("present", "not present"))
+
+plt_instream <-plt_instream + theme_bw() + ggtitle("Black Bass") + ylim(0, 1.0)
+
+
+
+library(ggpubr)
+Bass_Plots <- ggarrange(plot_depth, plt_velocity, plt_substrate, plt_cover,plt_instream,
+                          nrow = 3, ncol = 2)
+Bass_Plots
+
 
 #sink the file into whereever the fuck i put it. 
 sink(file = "LOGIT_5_9/Bass_GLM_FULL.txt")
