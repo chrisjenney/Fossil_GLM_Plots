@@ -1243,4 +1243,3 @@ sink(file = "LOGIT_5_9/Speckled_GLM_FULL.txt")
 summary(Specked_GLM)
 confint(Specked_GLM)
 sink()
-
